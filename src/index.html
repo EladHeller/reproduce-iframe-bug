@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome IFrame Bug Reproduction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .warning {
+            background: #fff5f5;
+            border-left: 4px solid #fc8181;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .warning-title {
+            color: #c53030;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .warning-text {
+            color: #742a2a;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .info-title {
+            color: #2c5282;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .steps {
+            color: #2d3748;
+            font-size: 14px;
+            line-height: 1.8;
+            margin-left: 20px;
+        }
+        
+        .steps li {
+            margin-bottom: 8px;
+        }
+        
+        .iframe-container {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tech-details {
+            background: #faf5ff;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+        
+        .tech-title {
+            color: #6b46c1;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .code-flow {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #2d3748;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+        
+        .arrow {
+            color: #9f7aea;
+            font-weight: bold;
+        }
+        
+        code {
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            color: #d53f8c;
+        }
+        
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Chrome IFrame Crash Bug</h1>
+        <p class="subtitle">Minimal reproduction for a Chrome tab crash caused by nested event handling in iframes</p>
+        
+        <div class="warning">
+            <div class="warning-title">
+                <span>⚠️</span>
+                <span>Expected Behavior</span>
+            </div>
+            <p class="warning-text">
+                Pressing <strong>Enter</strong> in the iframe below will crash the Chrome tab with "Aw, Snap!" error.
+                Mouse clicking works fine - only keyboard events trigger the crash.
+            </p>
+        </div>
+        
+        <div class="info-box">
+            <div class="info-title">📋 Test Instructions</div>
+            <ol class="steps">
+                <li>The button in the iframe below should be auto-focused</li>
+                <li>Press <strong>Enter</strong> key (or Space)</li>
+                <li>Chrome tab will crash immediately 💥</li>
+                <li>Compare: Reload and <strong>click with mouse</strong> - works fine ✓</li>
+            </ol>
+        </div>
+        
+        <div class="iframe-container">
+            <iframe id="iframe" src="iframe.html"></iframe>
+        </div>
+        
+        <div class="tech-details">
+            <div class="tech-title">🔍 Technical Details</div>
+            <div class="code-flow">
+                <strong>Event Chain:</strong><br>
+                <span class="arrow">1.</span> User presses Enter on button in iframe<br>
+                <span class="arrow">2.</span> <code>btn.onkeypress</code> handler fires<br>
+                <span class="arrow">3.</span> Handler calls <code>window.parent.hide()</code> directly<br>
+                <span class="arrow">4.</span> Parent removes iframe with <code>iframe.remove()</code><br>
+                <span class="arrow">5.</span> Try to return to keypress handler<br>
+                <span class="arrow">💥</span> <strong style="color: #c53030;">CRASH!</strong> Document no longer exists
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const iframe = document.getElementById('iframe');
+
+        function hide() {
+            iframe.remove(); // ← 💥 CRASH when called from keypress!
+        }
+    </script>
+</body>
+</html>
