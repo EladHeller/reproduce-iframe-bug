@@ -94,7 +94,7 @@ const btn = document.getElementById('btn');
 btn.onkeypress = function(e) {
     if (e.keyCode == 13 || e.charCode == 32) {
         window.parent.hide();  // ← Calls parent while keypress is active!
-        return false;
+        return false; // or e.preventDefault()
     }
 };
 
