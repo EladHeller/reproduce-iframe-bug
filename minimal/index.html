@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chrome IFrame Bug</title>
+    </head>
+<body>
+<h1>Parent Page</h1>
+<iframe id="iframe" src="iframe.html" width="400" height="300"></iframe>
+<script>
+    const iframe = document.getElementById('iframe');
+    
+    function hide() {
+        iframe.remove();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IFrame Content</title>
+</head>
+<body>
+    <h2>IFrame Content</h2>
+    <button id="btn">OK</button>
+    <script>
+        const btn = document.getElementById('btn');
+
+        // CRITICAL: Using onkeypress property (not addEventListener)
+        btn.onkeypress = function (e) {
+            // Limited to Enter/Space to avoid unintentional crashes
+            // But ANY key can theoretically trigger the crash
+            if (e.keyCode == 13 || e.charCode == 32) {
+                window.parent.hide();
+                return false;
+            }
+        };
+
+        btn.onclick = function (e) {
+            window.parent.hide();
+            return false;
+        };
+
+        btn.focus();
+    </script>
+</body>
+
+</html>
